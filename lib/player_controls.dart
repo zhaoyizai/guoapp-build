@@ -218,6 +218,9 @@ class _PlayerControlsState extends State<PlayerControls> {
     final visible =
         _visible || !state.playing || state.buffering || widget.panelOpen;
     return MouseRegion(
+      onEnter: (_) {
+        if (!widget.panelOpen) widget.onFocusSurface();
+      },
       onHover: (_) => _show(),
       cursor: visible ? SystemMouseCursors.basic : SystemMouseCursors.none,
       child: LayoutBuilder(

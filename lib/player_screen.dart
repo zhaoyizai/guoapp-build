@@ -167,6 +167,10 @@ class _PlayerScreenState extends State<PlayerScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    HardwareKeyboard.instance.addHandler(_handleGlobalKey);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !_closed) _playerFocus.requestFocus();
+    });
     _index = widget.initialIndex;
     _profileEpoch = widget.handoff?.profileEpoch ?? widget.store.profileEpoch;
     final preferences = widget.store.playbackPreferences;
@@ -747,6 +751,24 @@ class _PlayerScreenState extends State<PlayerScreen>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _lifecycleState = state;
     _applyLifecycleVisibility();
+    if (state == AppLifecycleState.resumed && !_panelOpen && mounted) {
+      _playerFocus.requestFocus();
+    }
+  }
+
+  /// 播放页在前台时，空格 / 媒体播放键不依赖焦点也要能暂停或继续。
+  bool _handleGlobalKey(KeyEvent event) {
+    if (!mounted || _closed || _television || _panelOpen) return false;
+    if (!(ModalRoute.of(context)?.isCurrent ?? true)) return false;
+    final key = event.logicalKey;
+    if (key != LogicalKeyboardKey.space &&
+        key != LogicalKeyboardKey.mediaPlayPause) {
+      return false;
+    }
+    final focused = FocusManager.instance.primaryFocus?.context?.widget;
+    if (focused is EditableText) return false;
+    if (event is KeyDownEvent) _togglePlayback();
+    return true;
   }
 
   void _queueRecovery() {
@@ -1466,6 +1488,7 @@ class _PlayerScreenState extends State<PlayerScreen>
       AppDevice.channel.setMethodCallHandler(null);
     }
     _interactions.dispose();
+    HardwareKeyboard.instance.removeHandler(_handleGlobalKey);
     _playerFocus.dispose();
     _menuRevision.dispose();
     unawaited(_saveProgress(flush: true));
@@ -1541,7 +1564,7 @@ class _PlayerScreenState extends State<PlayerScreen>
           onKeyEvent: (_, event) {
             if (_television ||
                 _panelOpen ||
-                !_playerFocus.hasPrimaryFocus ||
+                !_playerFocus.hasFocus ||
                 !(ModalRoute.of(context)?.isCurrent ?? true)) {
               return KeyEventResult.ignored;
             }
