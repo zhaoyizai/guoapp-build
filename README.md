@@ -103,14 +103,14 @@ keyPassword=你的密码
 本仓库（`zhaoyizai/guoapp-build`）是在上游源码之上叠加本地改动的构建仓库，不是 fork：
 
 - `upstream` → 上游原仓库（只读，用于拉取最新源码）
-- `build` → 本构建仓库，推送到 `main` 即触发 GitHub Actions，产出 APK 与 Windows ZIP 并发布 Release
+- `origin` → 本构建仓库，推送到 `main` 即触发 GitHub Actions，产出 APK 与 Windows ZIP 并发布 Release
 
 上游更新后同步：
 
 ~~~sh
 git fetch upstream
 git merge upstream/main      # 有冲突时手动解决
-git push build main          # 触发构建
+git push origin main         # 触发构建
 ~~~
 
 或直接运行 `scripts/sync_upstream.sh`（冲突时自动中止并保持工作区干净）。每次同步后若上游改动了本仓库改过的文件（Linux 平台、构建脚本、CI 配置），需要重新适配并让构建通过后再发版。

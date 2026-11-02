@@ -12,4 +12,4 @@ if ! git merge --no-edit "$remote/$branch"; then
   git merge --abort || true
   exit 1
 fi
-git push build "$branch"
+git push origin "$branch"
