@@ -71,6 +71,18 @@ void main() {
     expect(restarted.sourcesUnlocked, isTrue);
   });
 
+  test('an automatic reload keeps the gate unlocked for this run', () async {
+    final store = await create();
+    await store.enableSourceGate('666');
+    store.lockSources();
+    await store.unlockSources('666');
+    expect(store.sourcesUnlocked, isTrue);
+    await store.reload();
+    expect(store.sourcesUnlocked, isTrue);
+    expect(store.sources.length, allSourcesEnabled ? 11 : 1);
+    expect(store.allowsSource('huangdou'), isTrue);
+  });
+
   test('disabling the gate restores every compiled source', () async {
     final store = await create();
     await store.enableSourceGate('666');

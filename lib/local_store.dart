@@ -1226,12 +1226,20 @@ class LocalStore extends ChangeNotifier {
         : null;
     final previousId = _current;
     final previousLocked = locked;
+    // 后台自动任务会周期性调用 reload，解锁状态属于本次运行，不能因此丢失。
+    final previousUnlocked = _sourcesUnlocked;
+    final previousGate = _gateEnabled ? '$_gateSalt:$_gateHash' : '';
     await preferences.reload();
     _initialize();
     if (_configurationError == null &&
         previousProfiles == _string('profiles') &&
         previousId == _current) {
       _locked = previousLocked;
+      if (previousGate.isNotEmpty &&
+          _gateEnabled &&
+          previousGate == '$_gateSalt:$_gateHash') {
+        _sourcesUnlocked = previousUnlocked;
+      }
     } else {
       _epoch++;
     }
