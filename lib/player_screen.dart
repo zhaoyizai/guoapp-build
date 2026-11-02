@@ -751,7 +751,10 @@ class _PlayerScreenState extends State<PlayerScreen>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _lifecycleState = state;
     _applyLifecycleVisibility();
-    if (state == AppLifecycleState.resumed && !_panelOpen && mounted) {
+    if (state == AppLifecycleState.resumed &&
+        !_panelOpen &&
+        mounted &&
+        (ModalRoute.of(context)?.isCurrent ?? true)) {
       _playerFocus.requestFocus();
     }
   }
